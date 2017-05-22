@@ -4,6 +4,7 @@ import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
 import RaisedButton from 'material-ui/RaisedButton';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import Clock from 'react-clock';
 injectTapEventPlugin();
 /**
  * A simple example of `AppBar` with an icon on the right.
@@ -43,23 +44,31 @@ injectTapEventPlugin();
 
 
   render() {
+    let now = new Date();
+    const timeStyling = {
+      color: "white",
+      fontSize: "1.2em",
+      margin: "auto"
+    }
     return (
       <div>
         <AppBar
-        title="ConnXus"
+        title={<img className="logo" src='src/assets/white_cxs_logo.png'/>}
         iconClassNameRight="muidocs-icon-navigation-expand-more"
         onLeftIconButtonTouchTap={this.handleToggle}
-        />
-        <Drawer
-          docked={false}
-          width={200}
-          open={this.state.open}
-          onRequestChange={(open) => this.setState({open})}
         >
-          <MenuItem onTouchTap={this.setHome}>Home</MenuItem>
-          <MenuItem onTouchTap={this.setRegisterEmployee}>Register Employee</MenuItem>
-          <MenuItem onTouchTap={this.setViewTimes}>View Clock Ins</MenuItem>
-        </Drawer>
+          <Drawer
+            docked={false}
+            width={200}
+            open={this.state.open}
+            onRequestChange={(open) => this.setState({open})}
+          >
+            <MenuItem onTouchTap={this.setHome}>Home</MenuItem>
+            <MenuItem onTouchTap={this.setRegisterEmployee}>Register Employee</MenuItem>
+            <MenuItem onTouchTap={this.setViewTimes}>View Clock Ins</MenuItem>
+          </Drawer>
+        <Clock style={timeStyling}/>
+        </AppBar>
       </div>
     );
   }
