@@ -12,7 +12,7 @@ import { observer } from 'mobx-react';
         return (
         <div>
           <Title appState={this.props.appState}/>
-          <Home />
+          <Home appState={this.props.appState}/>
         </div>
       )
     }
