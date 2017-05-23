@@ -2,6 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import firebase from 'firebase';
 import CircularProgress from 'material-ui/CircularProgress';
+import injectTapEventPlugin from 'react-tap-event-plugin';
 import {
   Table,
   TableBody,
@@ -56,7 +57,7 @@ export default class Home extends React.Component {
           <TableBody displayRowCheckbox={false}>
           {users.map(function(user){
               return (
-                <TableRow selectable={true}>
+                <TableRow onTouchTap={console.log("yah got me")} selectable={true}>
                   <TableRowColumn><img className="avatar" src={user.photoURL} /></TableRowColumn>
                   <TableRowColumn>{user.name}</TableRowColumn>
                   <TableRowColumn>Null</TableRowColumn>

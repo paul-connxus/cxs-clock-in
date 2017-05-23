@@ -2,6 +2,7 @@ import React from 'react';
 import Home from './home';
 import Title from './title';
 import RegisterEmployee from './register';
+import ViewTimes from './viewTimes';
 import { observer } from 'mobx-react';
 
 @observer
@@ -28,7 +29,7 @@ import { observer } from 'mobx-react';
         return (
         <div>
           <Title appState={this.props.appState}/>
-          <viewTimes />
+          <ViewTimes appState={this.props.appState}/>
         </div>
       )
     }

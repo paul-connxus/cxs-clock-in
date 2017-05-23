@@ -10,3 +10,10 @@
   height: 2.7em;
   border-radius: 50%;
 }
+.loading {
+  height: 100%
+}
+.circle > {
+  height: 100%;
+  margin: auto;
+}

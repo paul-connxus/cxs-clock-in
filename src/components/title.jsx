@@ -5,6 +5,7 @@ import MenuItem from 'material-ui/MenuItem';
 import RaisedButton from 'material-ui/RaisedButton';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import Clock from 'react-clock';
+import FontAwesome from 'react-fontawesome';
 injectTapEventPlugin();
 /**
  * A simple example of `AppBar` with an icon on the right.
@@ -63,9 +64,9 @@ injectTapEventPlugin();
             open={this.state.open}
             onRequestChange={(open) => this.setState({open})}
           >
-            <MenuItem onTouchTap={this.setHome}>Home</MenuItem>
-            <MenuItem onTouchTap={this.setRegisterEmployee}>Register Employee</MenuItem>
-            <MenuItem onTouchTap={this.setViewTimes}>View Clock Ins</MenuItem>
+            <MenuItem onTouchTap={this.setHome}><FontAwesome name='home' /> Home</MenuItem>
+            <MenuItem onTouchTap={this.setRegisterEmployee}><FontAwesome name='user' /> Register Employee</MenuItem>
+            <MenuItem onTouchTap={this.setViewTimes}><FontAwesome name='clock-o' /> View Clock Ins</MenuItem>
           </Drawer>
         <Clock style={timeStyling}/>
         </AppBar>
