@@ -20,7 +20,7 @@ import { observer } from 'mobx-react';
         return (
         <div>
           <Title appState={this.props.appState}/>
-          <RegisterEmployee />
+          <RegisterEmployee appState={this.props.appState} />
         </div>
       )
     }
