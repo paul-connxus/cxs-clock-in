@@ -6,7 +6,6 @@ import RaisedButton from 'material-ui/RaisedButton';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import Clock from 'react-clock';
 import FontAwesome from 'react-fontawesome';
-injectTapEventPlugin();
 /**
  * A simple example of `AppBar` with an icon on the right.
  * By default, the left icon is a navigation-menu.
@@ -51,9 +50,12 @@ injectTapEventPlugin();
       fontSize: "1.2em",
       margin: "auto"
     }
+    const appBarStyling = {
+      position: "fixed"
+    }
     return (
       <div>
-        <AppBar
+        <AppBar style={appBarStyling}
         title={<img className="logo" src='src/assets/white_cxs_logo.png'/>}
         iconClassNameRight="muidocs-icon-navigation-expand-more"
         onLeftIconButtonTouchTap={this.handleToggle}

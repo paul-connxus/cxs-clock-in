@@ -9,9 +9,4 @@ class AppState {
   @observable loading = true;
 }
 
-
 export default AppState;
-autorun(() => {
-  var appState = new AppState
-  console.log(AppState.users);
-});

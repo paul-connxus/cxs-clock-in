@@ -9,11 +9,17 @@ import { observer } from 'mobx-react';
  export default class MainPage extends React.Component {
 
    render() {
+    const mainStyle = {
+       marginTop: "3em"
+    }
+
     if (this.props.appState.home) {
         return (
         <div>
           <Title appState={this.props.appState}/>
-          <Home appState={this.props.appState}/>
+          <div>
+            <Home appState={this.props.appState}/>
+          </div>
         </div>
       )
     }
@@ -35,7 +41,4 @@ import { observer } from 'mobx-react';
     }
   }
 
-  log = () => {
-    console.log(this);
-  }
 };
