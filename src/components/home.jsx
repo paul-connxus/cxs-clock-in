@@ -50,12 +50,12 @@ export default class Home extends React.Component {
             var day = childSnapshot.val();
             var dbUser = day[userId]
             if (dbUser) {
-              var signIn =  new Date(dbUser.signIn)
-              var signOut =  new Date(dbUser.signOut)
-              var formatedSignIn = `${signIn.getHours() > 12 ? signIn.getHours() - 12 : signIn.getHours()}:${signIn.getMinutes() < 10 ? '0' + signIn.getMinutes() : signIn.getMinutes()} ${signIn.getHours() < 12 ? 'AM' : 'PM'}`
-              var formatedSignOut = `${signOut.getHours() > 12 ? signOut.getHours() - 12 : signOut.getHours()}:${signOut.getMinutes() < 10 ? '0' + signOut.getMinutes() : signOut.getMinutes()} ${signOut.getHours() < 12 ? 'AM' : 'PM'}`
-              user.signIn = formatedSignIn
-              user.signOut = formatedSignOut;
+              // var signIn =  new Date(dbUser.signIn)
+              // var signOut =  new Date(dbUser.signOut)
+              // var formatedSignIn = `${signIn.getHours() > 12 ? signIn.getHours() - 12 : signIn.getHours()}:${signIn.getMinutes() < 10 ? '0' + signIn.getMinutes() : signIn.getMinutes()} ${signIn.getHours() < 12 ? 'AM' : 'PM'}`
+              // var formatedSignOut = `${signOut.getHours() > 12 ? signOut.getHours() - 12 : signOut.getHours()}:${signOut.getMinutes() < 10 ? '0' + signOut.getMinutes() : signOut.getMinutes()} ${signOut.getHours() < 12 ? 'AM' : 'PM'}`
+              user.signIn = dbUser.signIn
+              user.signOut = dbUser.signOut;
             } else {
               user.signIn = null;
               user.signOut = null;
@@ -67,21 +67,68 @@ export default class Home extends React.Component {
   }
 
   writeSignIn(user) {
-     var date = new Date();
-     var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    var newDate = new Date();
+    var unixDate = newDate.getTime();
+    var date = new Date(unixDate);
+    var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
     //  Finds Specific User
-     if (!user.signIn) {
-       firebase.database().ref(`userTimes/${path}/${user.userId}`).set({
-          signIn : date.getTime(),
-          signOut : null
+    firebase.database().ref(`userTimes/${path}/${user.userId}`).set({
+        signIn : unixDate,
+        signOut : null
+    });
+    user.signIn = unixDate;
+  }
+
+  writeSignOut(user) {
+    var newDate = new Date();
+    var unixDate = newDate.getTime();
+    var date = new Date(unixDate);
+    var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    if (user.signIn) {
+       firebase.database().ref(`userTimes/${path}/${user.userId}`).update({
+          signOut : unixDate
       });
-      user.signIn = date.toTimeString().split(' ')[0];
-    } else if (user.signIn) {
-        firebase.database().ref(`userTimes/${path}/${user.userId}`).update({
-           signOut : date.getTime()
-       });
-       user.signOut = date.toTimeString().split(' ')[0];
-    }
+      user.signOut = unixDate;
+   }
+  }
+
+  updateSignIn(node, user) {
+    var newDate = new Date();
+    var unixDate = newDate.getTime();
+    var date = new Date(unixDate);
+    var refSignIn = `${user.userId}SignIn`
+    var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    var value = node.refs[refSignIn].state.dialogTime.getTime();
+
+    firebase.database().ref(`userTimes/${path}/${user.userId}`).set({
+        signIn: value,
+        signOut: user.signOut ? user.signOut : null
+    })
+    .catch(function(error) {
+        console.log("Update failed: " + error.message)
+      });
+    debugger;
+    user.signIn = value;
+  }
+
+  updateSignOut(node, user) {
+    var newDate = new Date();
+    var unixDate = newDate.getTime();
+    var date = new Date(unixDate);
+    var refSignIn = `${user.userId}SignOut`
+    var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    var value = node.refs[refSignIn].state.dialogTime.getTime();
+    debugger;
+
+
+    firebase.database().ref(`userTimes/${path}/${user.userId}`).set({
+        signIn: user.signIn ? user.signIn : null,
+        signOut: value
+    });
+    debugger;
+    node.refs[refSignIn].handleAcceptDialog();
+    user.signOut = value;
+    debugger;
   }
 
   signInOrSignOut(user) {
@@ -90,7 +137,7 @@ export default class Home extends React.Component {
     if (user.signOut) {
       return (<FlatButton label="Done" />)
     } else if (user.signIn) {
-      return (<FlatButton label="Sign-Out" onTouchTap={self.writeSignIn.bind(self, user)}/>)
+      return (<FlatButton label="Sign-Out" onTouchTap={self.writeSignOut.bind(self, user)}/>)
     } else {
       return (<FlatButton label="Sign-In" onTouchTap={self.writeSignIn.bind(self, user)}/>)
     }
@@ -121,24 +168,28 @@ export default class Home extends React.Component {
               </TableHeader>
               <TableBody displayRowCheckbox={false}>
                 {users.map(function(user){
+                  var userSignIn = new Date(user.signIn);
+                  var userSignOut = new Date(user.signOut);
                     return (
                         <TableRow key={user.userId} selectable={false}>
                           <TableRowColumn><img className="avatar" src={user.photoURL} /></TableRowColumn>
                           <TableRowColumn>{user.name}</TableRowColumn>
                           <TableRowColumn>
-                          {typeof user.signIn === "string" ? (
-                            <div>{user.signIn}</div>
-                          ) : (
-                            <div>--:--</div>
-                          )
-                          }</TableRowColumn>
+                            <TimePicker
+                            id={`${user.userId}-${user.signIn ? user.signIn : 'blankBoi'}`}
+                            ref={`${user.userId}SignIn`}
+                            hintText="--:--"
+                            format="ampm"
+                            value={userSignIn ? userSignIn : null}
+                            onChange={self.updateSignIn.bind(self, self, user)} />
+                          </TableRowColumn>
                           <TableRowColumn>
-                          {typeof user.signOut === "string" ? (
-                              <div>{user.signOut}</div>
-                            ) : (
-                              <div>--:--</div>
-                            )
-                          }
+                            <TimePicker
+                            id={`${user.userId}-${user.signOut ? user.signOut : 'blankBoi'}`}
+                            ref={`${user.userId}SignOut`}
+                            hintText="--:--"
+                            format="ampm"
+                            value={user.signOut ? userSignOut : null} />
                           </TableRowColumn>
                           <TableRowColumn>
                             {self.signInOrSignOut(user)}
