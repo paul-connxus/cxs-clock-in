@@ -27,39 +27,73 @@ export default class Home extends React.Component {
     users.clear();
     this.props.appState.loading = true;
     var self = this;
-    var query = firebase.database().ref("users").orderByKey();
-      query.once("value")
+    var userQuery = firebase.database().ref("users").orderByKey();
+    var timesQuery = firebase.database().ref("userTimes").orderByKey();
+      userQuery.once("value")
           .then(function(snapshot) {
             snapshot.forEach(function(childSnapshot) {
               var user = childSnapshot.val();
-              user.signIn = null;
-              user.signOut = null;
-              self.writeSignIn(user);
-              users.push(user);
+              self.getUserTimes(user, users);
           }
         );
-        self.props.appState.loading = false;
       });
+    self.props.appState.loading = false;
+  }
 
+  getUserTimes(user, users) {
+    var self = this;
+    var timesQuery = firebase.database().ref("userTimes").orderByKey();
+    var userId = user.userId;
+    timesQuery.once("value")
+        .then(function(snapshot) {
+          snapshot.forEach(function(childSnapshot) {
+            var day = childSnapshot.val();
+            var dbUser = day[userId]
+            if (dbUser) {
+              var signIn =  new Date(dbUser.signIn)
+              var signOut =  new Date(dbUser.signOut)
+              var formatedSignIn = `${signIn.getHours() > 12 ? signIn.getHours() - 12 : signIn.getHours()}:${signIn.getMinutes() < 10 ? '0' + signIn.getMinutes() : signIn.getMinutes()} ${signIn.getHours() < 12 ? 'AM' : 'PM'}`
+              var formatedSignOut = `${signOut.getHours() > 12 ? signOut.getHours() - 12 : signOut.getHours()}:${signOut.getMinutes() < 10 ? '0' + signOut.getMinutes() : signOut.getMinutes()} ${signOut.getHours() < 12 ? 'AM' : 'PM'}`
+              user.signIn = formatedSignIn
+              user.signOut = formatedSignOut;
+            } else {
+              user.signIn = null;
+              user.signOut = null;
+            }
+          users.push(user);
+        }
+      );
+    });
   }
 
   writeSignIn(user) {
      var date = new Date();
-     var path = date.getMonth() + '-' + date.getDate() + '-' + date.getFullYear();
+     var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
     //  Finds Specific User
      if (!user.signIn) {
        firebase.database().ref(`userTimes/${path}/${user.userId}`).set({
-          signIn : date.getTime()
+          signIn : date.getTime(),
+          signOut : null
       });
       user.signIn = date.toTimeString().split(' ')[0];
-     }
-     if (user.signIn) {
-       firebase.database().ref(`userTimes/${path}/${user.userId}`).set({
-          signOut : date.getTime()
-      });
-      user.signOut = date.toTimeString().split(' ')[0];
-     }
+    } else if (user.signIn) {
+        firebase.database().ref(`userTimes/${path}/${user.userId}`).update({
+           signOut : date.getTime()
+       });
+       user.signOut = date.toTimeString().split(' ')[0];
+    }
+  }
 
+  signInOrSignOut(user) {
+    var self = this;
+
+    if (user.signOut) {
+      return (<FlatButton label="Done" />)
+    } else if (user.signIn) {
+      return (<FlatButton label="Sign-Out" onTouchTap={self.writeSignIn.bind(self, user)}/>)
+    } else {
+      return (<FlatButton label="Sign-In" onTouchTap={self.writeSignIn.bind(self, user)}/>)
+    }
   }
 
   componentWillMount() {
@@ -93,26 +127,21 @@ export default class Home extends React.Component {
                           <TableRowColumn>{user.name}</TableRowColumn>
                           <TableRowColumn>
                           {typeof user.signIn === "string" ? (
-                            user.signIn
+                            <div>{user.signIn}</div>
                           ) : (
-                            console.log(user)
+                            <div>--:--</div>
                           )
                           }</TableRowColumn>
                           <TableRowColumn>
-                          {typeof user.signIn === "string" ? (
-                              user.signOut
+                          {typeof user.signOut === "string" ? (
+                              <div>{user.signOut}</div>
                             ) : (
-                              console.log(user)
+                              <div>--:--</div>
                             )
                           }
                           </TableRowColumn>
                           <TableRowColumn>
-                          {(() => {
-                             switch (user.signIn) {
-                              case typeof user.signIn === "String" :   return (<FlatButton label="Sign-Out" />);
-                              default:                               return  (<FlatButton label="Sign-In" />);
-                             }
-                           })()}
+                            {self.signInOrSignOut(user)}
                           </TableRowColumn>
                         </TableRow>
                     )

@@ -20,10 +20,6 @@ firebase.initializeApp(config);
 
 const appState = window.appState = new AppState();
 
-autorun(() => {
-  console.log('store changed');
-})
-
 render(
   <AppContainer>
     <App appState={appState} />

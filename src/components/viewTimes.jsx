@@ -11,6 +11,10 @@ var allViews = Object.keys(BigCalendar.views).map(k => BigCalendar.views[k])
 
 export default class ViewTimes extends React.Component {
 
+  test = () => {
+    console.log("You Did It");
+  }
+
   render(){
     var myEventsList = []
     const style ={
@@ -20,7 +24,8 @@ export default class ViewTimes extends React.Component {
       <BigCalendar
         style={style}
         events={myEventsList}
-        selectable
+        selectable={true}
+        onSelecting={this.test.bind(this)}
         defaultDate={new Date()}
       />
     )
