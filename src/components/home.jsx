@@ -42,7 +42,7 @@ export default class Home extends React.Component {
 
   checkToday(users) {
     var date = new Date();
-    var todaysPath = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    var todaysPath = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
 
     console.log("Timer has start!!!");
     setTimeout(this.populateUserArray(users), 1080000);
@@ -53,7 +53,7 @@ export default class Home extends React.Component {
     var timesQuery = firebase.database().ref("userTimes").orderByKey();
     var userId = user.userId;
     var date = new Date();
-    var todaysPath = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    var todaysPath = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
 
     timesQuery.once("value")
         .then(function(snapshot) {
@@ -62,10 +62,6 @@ export default class Home extends React.Component {
               var day = childSnapshot.val();
               var dbUser = day[userId]
               if (dbUser) {
-                // var signIn =  new Date(dbUser.signIn)
-                // var signOut =  new Date(dbUser.signOut)
-                // var formatedSignIn = `${signIn.getHours() > 12 ? signIn.getHours() - 12 : signIn.getHours()}:${signIn.getMinutes() < 10 ? '0' + signIn.getMinutes() : signIn.getMinutes()} ${signIn.getHours() < 12 ? 'AM' : 'PM'}`
-                // var formatedSignOut = `${signOut.getHours() > 12 ? signOut.getHours() - 12 : signOut.getHours()}:${signOut.getMinutes() < 10 ? '0' + signOut.getMinutes() : signOut.getMinutes()} ${signOut.getHours() < 12 ? 'AM' : 'PM'}`
                 if (dbUser.signIn) {
                   user.signIn = dbUser.signIn;
                 } else {
@@ -81,12 +77,9 @@ export default class Home extends React.Component {
                 user.signIn = null;
                 user.signOut = null;
               }
-            } else {
-              user.signIn = null;
-              user.signOut = null;
+              users.push(user);
             }
-          users.push(user);
-        }
+          }
       );
     });
   }
@@ -95,7 +88,7 @@ export default class Home extends React.Component {
     var newDate = new Date();
     var unixDate = newDate.getTime();
     var date = new Date(unixDate);
-    var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    var path = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
     //  Finds Specific User
     firebase.database().ref(`userTimes/${path}/${user.userId}`).set({
         signIn : unixDate,
@@ -108,7 +101,7 @@ export default class Home extends React.Component {
     var newDate = new Date();
     var unixDate = newDate.getTime();
     var date = new Date(unixDate);
-    var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    var path = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
     if (user.signIn) {
        firebase.database().ref(`userTimes/${path}/${user.userId}`).update({
           signOut : unixDate
@@ -122,7 +115,7 @@ export default class Home extends React.Component {
     var date = new Date();
     var user = this.user;
     var refSignIn = `${user.userId}SignIn`
-    var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    var path = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
     var value = time;
 
     firebase.database().ref(`userTimes/${path}/${user.userId}`).set({
@@ -140,7 +133,7 @@ export default class Home extends React.Component {
     var date = new Date();
     var user = this.user;
     var refSignIn = `${user.userId}SignOut`
-    var path = `${date.getMonth()}-${date.getDate()}-${date.getFullYear()}`
+    var path = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
     var value = time;
 
     firebase.database().ref(`userTimes/${path}/${user.userId}`).set({
