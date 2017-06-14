@@ -3,6 +3,7 @@ import { Observer, observer } from 'mobx-react';
 import firebase from 'firebase';
 import CircularProgress from 'material-ui/CircularProgress';
 import TimePicker from 'material-ui/TimePicker';
+import Snackbar from 'material-ui/Snackbar';
 import FlatButton from 'material-ui/FlatButton';
 import Paper from 'material-ui/Paper';
 import injectTapEventPlugin from 'react-tap-event-plugin';
@@ -22,6 +23,27 @@ import {
 
 @observer
 export default class Home extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      autoHideDuration: 4000,
+      message: null,
+      open: false,
+      };
+  }
+
+  handleTouchTap = () => {
+    this.setState({
+      open: true,
+    });
+  };
+
+  handleActionTouchTap = () => {
+    this.setState({
+      open: false,
+    });
+  };
 
   populateUserArray(users) {
     users.clear();
@@ -53,11 +75,12 @@ export default class Home extends React.Component {
 
   checkToday(users) {
     var date = new Date();
+    var self = this;
     var todaysPath = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
-
+    self.populateUserArray(users);
     console.log("Timer has start!!!");
     setTimeout(function() {
-      self.populateUserArray(users);
+      self.checkToday(users);
     }, 3600000);
   }
 
@@ -113,6 +136,8 @@ export default class Home extends React.Component {
         signOut : null
     });
     user.signIn = unixDate;
+    this.state.open = true;
+    this.state.message = `You have been signed in ${user.name}. Enjoy your day!`;
   }
 
   writeSignOut(user) {
@@ -125,6 +150,8 @@ export default class Home extends React.Component {
           signOut : unixDate
       });
       user.signOut = unixDate;
+      this.state.open = true;
+      this.state.message = `You have been signed out ${user.name}. Enjoy the rest of your day!`;
    }
   }
 
@@ -144,6 +171,8 @@ export default class Home extends React.Component {
         console.log("Update failed: " + error.message)
       });
     user.signIn = value;
+    this.self.state.open = true;
+    this.self.state.message = `${user.name}, your sign in time has been changed.`;
   }
 
   updateSignOut(event, time) {
@@ -162,6 +191,9 @@ export default class Home extends React.Component {
         console.log("Update failed: " + error.message)
       });
     user.signOut = value;
+    this.self.state.open = true;
+
+    this.self.state.message = `${user.name}, your sign out time has been changed.`;
   }
 
   signInOrSignOut(user) {
@@ -191,6 +223,12 @@ export default class Home extends React.Component {
       const paperStyle = {
         margin: '1em'
       }
+      const nameStyle = {
+        fontSize: '16'
+      }
+      const buttonStyle = {
+        textAlign: 'right'
+      }
       return (
         <div style={style}>
           <Paper style={paperStyle}>
@@ -216,12 +254,13 @@ export default class Home extends React.Component {
                     return (
                         <TableRow key={user.userId} selectable={false}>
                           <TableRowColumn><img className="avatar" src={user.photoURL} /></TableRowColumn>
-                          <TableRowColumn>{user.name}</TableRowColumn>
+                          <TableRowColumn style={nameStyle}>{user.name}</TableRowColumn>
                           <TableRowColumn>
                             <TimePicker
                             id={`${user.userId}-${user.signIn ? user.signIn : 'blankBoi'}`}
                             ref={`${user.userId}SignIn`}
                             user={user}
+                            self={self}
                             hintText="--:--"
                             format="ampm"
                             value={userSignIn ? userSignIn : null}
@@ -232,6 +271,7 @@ export default class Home extends React.Component {
                             id={`${user.userId}-${user.signOut ? user.signOut : 'blankBoi'}`}
                             ref={`${user.userId}SignOut`}
                             user={user}
+                            self={self}
                             hintText="--:--"
                             format="ampm"
                             value={userSignOut ? userSignOut : null}
@@ -247,6 +287,11 @@ export default class Home extends React.Component {
               </TableBody>
             </Table>
           </Paper>
+          <Snackbar
+            open={this.state.open}
+            message={this.state.message}
+            autoHideDuration={this.state.autoHideDuration}
+          />
         </div>
       )
     } else {
