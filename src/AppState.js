@@ -6,6 +6,7 @@ class AppState {
   @observable registerEmployee = false;
   @observable viewTimes = false;
   @observable users = [];
+  @observable userTimes = {};
   @observable loading = true;
 }
 

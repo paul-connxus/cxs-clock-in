@@ -40,12 +40,25 @@ export default class Home extends React.Component {
     self.props.appState.loading = false;
   }
 
+
+  checkUserSignInAndSignOut(user, users) {
+    if (user.signIn || user.signOut) {
+      return true;
+    }
+    if (!user.signIn && !user.signOut) {
+      user.signIn = null;
+      user.signOut = null;
+    }
+  }
+
   checkToday(users) {
     var date = new Date();
     var todaysPath = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
 
     console.log("Timer has start!!!");
-    setTimeout(this.populateUserArray(users), 1080000);
+    setTimeout(function() {
+      self.populateUserArray(users);
+    }, 3600000);
   }
 
   getUserTimes(user, users) {
@@ -54,34 +67,39 @@ export default class Home extends React.Component {
     var userId = user.userId;
     var date = new Date();
     var todaysPath = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`
+    var todaysUserTimes = this.props.appState.userTimes
 
-    timesQuery.once("value")
-        .then(function(snapshot) {
-          snapshot.forEach(function(childSnapshot) {
-            if (childSnapshot.key === todaysPath) {
-              var day = childSnapshot.val();
-              var dbUser = day[userId]
-              if (dbUser) {
-                if (dbUser.signIn) {
-                  user.signIn = dbUser.signIn;
-                } else {
-                  user.signIn = null;
-                }
+    return timesQuery.once("value")
+        .then(function(userTimes) {
+        var todayObj = userTimes.val();
+        todaysUserTimes = todayObj[todaysPath];
 
-                if (dbUser.signOut) {
-                  user.signOut = dbUser.signOut;
-                } else {
-                  user.signOut = null;
-                }
+        if (todaysUserTimes) {
+            var dbUser = todaysUserTimes[userId]
+
+            if (dbUser) {
+              if (dbUser.signIn) {
+                user.signIn = dbUser.signIn;
               } else {
                 user.signIn = null;
+              }
+              if (dbUser.signOut) {
+                user.signOut = dbUser.signOut;
+              } else {
                 user.signOut = null;
               }
-              users.push(user);
             }
-          }
-      );
-    });
+            users.push(user);
+            self.checkUserSignInAndSignOut(user, users);
+        } else {
+           firebase.database().ref(`userTimes/${todaysPath}/${user.userId}`).set({
+            signIn: false,
+            signOut: false
+          }).catch();
+          self.getUserTimes(user, users);
+        }
+    }
+  );
   }
 
   writeSignIn(user) {
@@ -149,7 +167,7 @@ export default class Home extends React.Component {
   signInOrSignOut(user) {
     var self = this;
 
-    if (user.signOut) {
+    if (user.signOut && user.signIn) {
       return (<FlatButton label="Done" />)
     } else if (user.signIn) {
       return (<FlatButton label="Sign-Out" onTouchTap={self.writeSignOut.bind(self, user)}/>)
@@ -170,8 +188,12 @@ export default class Home extends React.Component {
       const style ={
         paddingTop: '3.5em'
       }
+      const paperStyle = {
+        margin: '1em'
+      }
       return (
         <div style={style}>
+          <Paper style={paperStyle}>
             <Table multiSelectable={false}>
               <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
                 <TableRow>
@@ -184,8 +206,13 @@ export default class Home extends React.Component {
               </TableHeader>
               <TableBody displayRowCheckbox={false}>
                 {users.map(function(user){
-                  var userSignIn = new Date(user.signIn);
-                  var userSignOut = new Date(user.signOut);
+                  if (user.signIn) {
+                      var userSignIn = new Date(user.signIn);
+                  }
+                  if (user.signOut) {
+                    var userSignOut = new Date(user.signOut);
+                  }
+
                     return (
                         <TableRow key={user.userId} selectable={false}>
                           <TableRowColumn><img className="avatar" src={user.photoURL} /></TableRowColumn>
@@ -197,8 +224,6 @@ export default class Home extends React.Component {
                             user={user}
                             hintText="--:--"
                             format="ampm"
-                            initialTime={null}
-                            defaultTime={null}
                             value={userSignIn ? userSignIn : null}
                             onChange={self.updateSignIn} />
                           </TableRowColumn>
@@ -209,8 +234,6 @@ export default class Home extends React.Component {
                             user={user}
                             hintText="--:--"
                             format="ampm"
-                            initialTime={null}
-                            defaultTime={null}
                             value={userSignOut ? userSignOut : null}
                             onChange={self.updateSignOut} />
                           </TableRowColumn>
@@ -223,6 +246,7 @@ export default class Home extends React.Component {
                 }
               </TableBody>
             </Table>
+          </Paper>
         </div>
       )
     } else {

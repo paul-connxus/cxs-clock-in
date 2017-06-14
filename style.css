@@ -1,5 +1,18 @@
+* {
+  font-family: 'Roboto', sans-serif;
+}
+
+hr {
+  display: none;
+}
+
+body {
+  margin: 0;
+}
+
 .clock {
   font-size: 2.5em;
+  font-weight: 100;
   color: white;
   margin: auto;
 }

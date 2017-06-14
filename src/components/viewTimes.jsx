@@ -139,8 +139,12 @@ export default class ViewTimes extends React.Component {
           </TableHeader>
           <TableBody displayRowCheckbox={false}>
           {users.map(function(user){
-            var userSignIn = new Date(user.signIn);
-            var userSignOut = new Date(user.signOut);
+            if (user.signIn) {
+              var userSignIn = new Date(user.signIn);
+            }
+            if (user.signOut) {
+              var userSignOut = new Date(user.signOut);
+            }
               return (
                   <TableRow key={user.userId} selectable={false}>
                     <TableRowColumn><img className="avatar" src={user.photoURL} /></TableRowColumn>
